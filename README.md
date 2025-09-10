@@ -15,7 +15,9 @@ By assembling sequences of such tokens, digital data can be transformed into 3D 
 
 A three-dimensional primitive: the open cube, derived from a skeletal cube with selective edge removal.
 
-By enforcing rules of connectivity, dimensionality, and rotational uniqueness, we obtain a finite library of distinct cube types.
+By enforcing rules of connectivity, dimensionality, and rotational uniqueness,
+
+we obtain a finite library of distinct cube types.
 
 When combined with rotations and placements, these cubes form a rich symbol space.
 
