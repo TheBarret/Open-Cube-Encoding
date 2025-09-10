@@ -16,6 +16,9 @@ By enforcing rules of connectivity, dimensionality, and rotational uniqueness,
 we obtain a finite library of distinct cube types.  
 When combined with rotations and placements, these cubes form a rich symbol space.  
 
+<img width="1109" height="633" alt="image" src="https://github.com/user-attachments/assets/e2d98a17-e30f-4ac1-88ea-b4aebf08524a" />
+
+
 # Definitions & Encoding Capacity
 
 - Library `C`       : a finite set of M rotationally unique open cubes.
