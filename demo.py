@@ -4,6 +4,9 @@ from hashlib import sha256
 from hmac import HMAC
 from itertools import combinations, product
 import json
+import argparse
+from pathlib import Path
+from functools import lru_cache
 from typing import List, Tuple, Set, Dict, Optional
 
 class OpenCube:
@@ -72,9 +75,14 @@ class OpenCube:
         return len(x_coords) > 1 and len(y_coords) > 1 and len(z_coords) > 1
     
     def get_rotations(self) -> List['OpenCube']:
-        """Generate all 24 possible rotations of the cube"""
-        # 24 rotation matrices for cube orientations
-        rotations = []
+        """Generate all 24 possible rotations of the cube (cached for speed)."""
+        return OpenCube._cached_rotations(self.canonical_key())
+
+    @staticmethod
+    @lru_cache(maxsize=4096)
+    def _cached_rotations(edges_key: Tuple[Tuple[int, int], ...]) -> List['OpenCube']:
+        temp_edges = set(edges_key)
+        rotations: List[OpenCube] = []
         
         # Standard cube vertex coordinates
         coords = np.array([
@@ -121,7 +129,7 @@ class OpenCube:
                 
                 # Map edges using the vertex mapping
                 new_edges = set()
-                for v1, v2 in self.edges:
+                for v1, v2 in temp_edges:
                     if v1 in vertex_mapping and v2 in vertex_mapping:
                         new_v1, new_v2 = vertex_mapping[v1], vertex_mapping[v2]
                         new_edges.add((min(new_v1, new_v2), max(new_v1, new_v2)))
@@ -138,6 +146,10 @@ class OpenCube:
     
     def __repr__(self):
         return f"OpenCube({len(self.edges)} edges, {len(self.vertices)} vertices)"
+
+    def canonical_key(self) -> Tuple[Tuple[int, int], ...]:
+        """Return a deterministic, sortable representation of edges."""
+        return tuple(sorted((min(a, b), max(a, b)) for a, b in self.edges))
 
 
 class OpenCubeLibrary:
@@ -162,7 +174,7 @@ class OpenCubeLibrary:
             (0, 4), (1, 5), (2, 6), (3, 7)
         }
         
-        unique_cubes = set()
+        unique_cubes: Set[OpenCube] = set()
         
         # Try different numbers of edges (from minimal to full cube)
         for num_edges in range(3, len(full_edges) + 1):
@@ -171,7 +183,7 @@ class OpenCubeLibrary:
                 
             print(f"  Testing configurations with {num_edges} edges...")
             
-            for edges in combinations(full_edges, num_edges):
+            for edges in combinations(sorted(full_edges), num_edges):
                 cube = OpenCube(set(edges))
                 
                 # Check if it meets our criteria
@@ -192,7 +204,7 @@ class OpenCubeLibrary:
                     if len(unique_cubes) >= self.max_cubes:
                         break
         
-        self.cubes = list(unique_cubes)
+        self.cubes = sorted(unique_cubes, key=lambda c: c.canonical_key())[: self.max_cubes]
         print(f"Generated {len(self.cubes)} unique open cubes")
     
     def _are_rotationally_equivalent(self, cube1: OpenCube, cube2: OpenCube) -> bool:
@@ -372,51 +384,112 @@ class OpenCubeEncoder:
             return trimesh.Trimesh()
 
 
-def main():
-    print("=== Open Cube Encoding System ===\n")
-    
-    # Initialize encoder
-    encoder = OpenCubeEncoder(master_key=b'000000', max_cubes=16)
-    
-    # Test message
-    message = "Hello, World!"
-    print(f"Original message: '{message}'")
-    
-    # Encode
-    nonce = b'12345'
-    tokens = encoder.encode(message, nonce)
-    print(f"Encoded tokens: {tokens}")
-    
-    # Decode
-    decoded = encoder.decode(tokens, nonce)
-    print(f"Decoded message: '{decoded}'")
-    print(f"Encoding successful: {message == decoded}")
-    
-    # Create 3D visualization
-    print("\nGenerating 3D structure...")
-    mesh = encoder.create_mesh_from_tokens(tokens)
-    
-    # Library statistics
-    print(f"\nLibrary statistics:")
-    print(f"  Unique cubes: {encoder.library.size()}")
-    print(f"  Total symbol space: {encoder.M * encoder.R * encoder.P}")
-    print(f"  Bits per symbol: {np.log2(encoder.M * encoder.R * encoder.P):.2f}")
+def _build_encoder_from_args(args: argparse.Namespace) -> OpenCubeEncoder:
+    key_bytes = args.key.encode('utf-8') if isinstance(args.key, str) else args.key
+    return OpenCubeEncoder(master_key=key_bytes, max_cubes=args.max_cubes)
 
-    
-    if len(mesh.vertices) > 0:
-        print(f"Generated mesh with {len(mesh.vertices)} vertices")
-        
-        # Show visualization (requires display)
+
+def _parse_tokens(tokens_str: str) -> List[Tuple[int, int, int]]:
+    data = json.loads(tokens_str)
+    return [tuple(map(int, t)) for t in data]
+
+
+def main():
+    parser = argparse.ArgumentParser(description="Open Cube Encoding - Proof of Concept")
+    sub = parser.add_subparsers(dest='cmd')
+
+    parser.add_argument('--max-cubes', type=int, default=16)
+    parser.add_argument('--key', type=str, default='000000')
+
+    demo_p = sub.add_parser('demo', help='Run the demo flow')
+    demo_p.add_argument('--message', type=str, default='Hello, World!')
+    demo_p.add_argument('--nonce', type=str, default='12345')
+    demo_p.add_argument('--headless', action='store_true')
+
+    enc_p = sub.add_parser('encode', help='Encode a message to tokens')
+    enc_p.add_argument('--message', required=True)
+    enc_p.add_argument('--nonce', type=str, required=True)
+
+    dec_p = sub.add_parser('decode', help='Decode tokens to message')
+    dec_p.add_argument('--tokens', required=True, help='JSON list of [c,r,p]')
+    dec_p.add_argument('--nonce', type=str, required=True)
+
+    rend_p = sub.add_parser('render', help='Render tokens to OBJ')
+    rend_p.add_argument('--tokens', required=True, help='JSON list of [c,r,p]')
+    rend_p.add_argument('--output', type=str, default='encoded_message.obj')
+    rend_p.add_argument('--headless', action='store_true')
+
+    sub.add_parser('stats', help='Print library stats')
+
+    # Backwards-compat: allow running without subcommand -> demo
+    args = parser.parse_args()
+    if args.cmd is None:
+        # synthesize defaults for demo
+        args.cmd = 'demo'
+        args.message = 'Hello, World!'
+        args.nonce = '12345'
+        args.headless = True
+
+    print("=== Open Cube Encoding System ===\n")
+    encoder = _build_encoder_from_args(args)
+
+    if args.cmd == 'demo':
+        message = args.message
+        print(f"Original message: '{message}'")
+        nonce = args.nonce.encode('utf-8')
+        tokens = encoder.encode(message, nonce)
+        print(f"Encoded tokens: {tokens}")
+        decoded = encoder.decode(tokens, nonce)
+        print(f"Decoded message: '{decoded}'")
+        print(f"Encoding successful: {message == decoded}")
+        print("\nGenerating 3D structure...")
+        mesh = encoder.create_mesh_from_tokens(tokens)
+        print(f"\nLibrary statistics:")
+        print(f"  Unique cubes: {encoder.library.size()}")
+        print(f"  Total symbol space: {encoder.M * encoder.R * encoder.P}")
+        print(f"  Bits per symbol: {np.log2(encoder.M * encoder.R * encoder.P):.2f}")
+        if len(mesh.vertices) > 0:
+            print(f"Generated mesh with {len(mesh.vertices)} vertices")
+            try:
+                mesh.export('encoded_message.obj')
+                print("Saved as 'encoded_message.obj'")
+                if not args.headless:
+                    mesh.show()
+            except Exception as e:
+                print(f"Render/export not available: {e}")
+        else:
+            print("No mesh generated")
+
+    elif args.cmd == 'encode':
+        nonce = args.nonce.encode('utf-8')
+        tokens = encoder.encode(args.message, nonce)
+        print(json.dumps(tokens))
+
+    elif args.cmd == 'decode':
+        nonce = args.nonce.encode('utf-8')
+        tokens = _parse_tokens(args.tokens)
+        message = encoder.decode(tokens, nonce)
+        print(message)
+
+    elif args.cmd == 'render':
+        tokens = _parse_tokens(args.tokens)
+        mesh = encoder.create_mesh_from_tokens(tokens)
+        out = Path(args.output)
         try:
-            mesh.show()
-            mesh.export('encoded_message.obj')
-            print("Saved as 'encoded_message.obj'")
-        except:
-            print("Display not available!")
-            
-    else:
-        print("No mesh generated")
-    
+            mesh.export(str(out))
+            print(f"Saved OBJ to {out}")
+            if not args.headless:
+                mesh.show()
+        except Exception as e:
+            print(f"Failed to render/export: {e}")
+
+    elif args.cmd == 'stats':
+        print(f"Library size (M): {encoder.M}")
+        print(f"Rotations (R): {encoder.R}")
+        print(f"Placements (P): {encoder.P}")
+        print(f"Total symbol space: {encoder.M * encoder.R * encoder.P}")
+        print(f"Bits per token: {np.log2(encoder.M * encoder.R * encoder.P):.2f}")
+
 
 if __name__ == "__main__":
     main()
