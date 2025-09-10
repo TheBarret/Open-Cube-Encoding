@@ -56,8 +56,8 @@ Generated mesh with 2574 vertices
 
 Visual render:  
 
-<img width="480" height="453" alt="image" src="https://github.com/user-attachments/assets/92676f50-965f-43fc-881f-5601cf6525ab" />
-<img width="480" height="453" alt="image" src="https://github.com/user-attachments/assets/8d21ef46-6a21-4f0d-99aa-637d1fd6512f" />
+<img width="240" alt="image" src="https://github.com/user-attachments/assets/92676f50-965f-43fc-881f-5601cf6525ab" />
+<img width="240" alt="image" src="https://github.com/user-attachments/assets/8d21ef46-6a21-4f0d-99aa-637d1fd6512f" />
 
 
 
