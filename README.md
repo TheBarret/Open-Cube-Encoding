@@ -5,21 +5,16 @@ Geometric Encoding Scheme Using Rotationally Unique Open Cubes
 
 # Abstract
 
-A data encoding method based on rotationally unique open cubes.
-
-Each cube serves as a geometric token parameterized by type, orientation, and placement.
-
-By assembling sequences of such tokens, digital data can be transformed into 3D spatial structures.
+A data encoding method based on rotationally unique open cubes.  
+Each cube serves as a geometric token parameterized by type, orientation, and placement.  
+By assembling sequences of such tokens, digital data can be transformed into 3D spatial structures.  
 
 <img width="233" height="229" alt="image" src="https://github.com/user-attachments/assets/ab329918-ac83-47d1-a2bb-f9760cf62ab6" />
 
-A three-dimensional primitive: the open cube, derived from a skeletal cube with selective edge removal.
-
-By enforcing rules of connectivity, dimensionality, and rotational uniqueness,
-
-we obtain a finite library of distinct cube types.
-
-When combined with rotations and placements, these cubes form a rich symbol space.
+A three-dimensional primitive: the open cube, derived from a skeletal cube with selective edge removal.  
+By enforcing rules of connectivity, dimensionality, and rotational uniqueness,  
+we obtain a finite library of distinct cube types.  
+When combined with rotations and placements, these cubes form a rich symbol space.  
 
 # Definitions & Encoding Capacity
 
