@@ -1,7 +1,7 @@
 # Open Cube Encoding
 Geometric Encoding Scheme Using Rotationally Unique Open Cubes
 
-<img width="1015" alt="d7e4aaa1-a52c-401e-99c3-b35a18f64064" src="https://github.com/user-attachments/assets/30b7e7e5-eec3-4c6c-9bc6-4d6bbb79206b" />
+<img width="700" alt="d7e4aaa1-a52c-401e-99c3-b35a18f64064" src="https://github.com/user-attachments/assets/30b7e7e5-eec3-4c6c-9bc6-4d6bbb79206b" />
 
 # Abstract
 
