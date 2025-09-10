@@ -27,7 +27,15 @@ When combined with rotations and placements, these cubes form a rich symbol spac
 - Rotations `R`     : allowable orientations in 3D space (typically 24 for a cube).
 - Placements `P`    : relative adjacency options (e.g., 6 face-to-face positions).
 - Token             : `t = (c, r, p) where c ∈ C, r ∈ R, p ∈ P`
-- 
+ 
 ## Capacity
+```
+S = M × R × P
+Bits per token = log (S)
+```
 
-Bits per token = `S = M × R × P` -> `log (S)`
+# Information
+
+This project was inspired and credits where credits are due by:
+
+https://www.youtube.com/watch?v=_BrFKp-U8GI
