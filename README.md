@@ -31,8 +31,8 @@ Bits per token = log (S)
 
 # Proof of Concept
 
-```py
-python run3.py
+```bash
+python demo.py --demo --headless
 === Open Cube Encoding System ===
 
 Generating open cube library...
@@ -59,6 +59,31 @@ Visual render:
 <img width="240" alt="image" src="https://github.com/user-attachments/assets/92676f50-965f-43fc-881f-5601cf6525ab" />
 <img width="240" alt="image" src="https://github.com/user-attachments/assets/8d21ef46-6a21-4f0d-99aa-637d1fd6512f" />
 
+
+# Usage
+
+```bash
+# Install dependencies
+pip install -r requirements.txt
+
+# Encode a message (prints tokens as JSON)
+python demo.py encode --message "Hello, World!" --nonce 12345 --key 000000
+
+# Decode tokens (provide tokens JSON)
+python demo.py decode --tokens "[[6,16,3],[5,0,5]]" --nonce 12345 --key 000000
+
+# Render tokens to OBJ (no display in headless)
+python demo.py render --tokens "[[6,16,3],[5,0,5]]" --output encoded_message.obj --headless
+
+# Show library stats
+python demo.py stats
+```
+
+Flags:
+- `--key`: master key bytes (ASCII) for deterministic PRF
+- `--nonce`: nonce bytes (ASCII) to derive per-stream keys
+- `--max-cubes`: limit library size (default 16)
+- `--headless`: skip visualization window
 
 
 # Information
