@@ -29,6 +29,38 @@ S = M × R × P
 Bits per token = log (S)
 ```
 
+# Proof of Concept
+
+```py
+python run3.py
+=== Open Cube Encoding System ===
+
+Generating open cube library...
+  Testing configurations with 3 edges...
+Generated 16 unique open cubes
+Initialized encoder: M=16, R=24, P=6
+Bits per token: 11.17
+Original message: 'Hello, World!'
+Encoded tokens: [(6, 16, 3), (5, 0, 5), (12, 22, 0), (12, 22, 0), (10, 0, 2), (12, 11, 0), (5, 7, 4), (12, 11, 1), (10, 0, 2), (10, 0, 4), (12, 22, 0), (9, 3, 4), (1, 6, 3)]
+Decoded message: 'Hello, World!'
+Encoding successful: True
+
+Generating 3D structure...
+
+Library statistics:
+  Unique cubes: 16
+  Total symbol space: 2304
+  Bits per symbol: 11.17
+Generated mesh with 2574 vertices
+```
+
+Visual render:  
+
+<img width="480" height="453" alt="image" src="https://github.com/user-attachments/assets/92676f50-965f-43fc-881f-5601cf6525ab" />
+<img width="480" height="453" alt="image" src="https://github.com/user-attachments/assets/8d21ef46-6a21-4f0d-99aa-637d1fd6512f" />
+
+
+
 # Information
 
 This project was inspired and credits where credits are due by:
